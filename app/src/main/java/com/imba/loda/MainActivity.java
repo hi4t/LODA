@@ -15,17 +15,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private Button download, pause, cancel;
+    private LodaEntry entry;
+    private LodaManager mlodaManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        mlodaManager = LodaManager.getInstance(this);
     }
 
     private DataWatcher watcher = new DataWatcher() {
         @Override
         public void updata(LodaEntry data) {
+            entry = data;
+            if (data.getStatus() == LodaEntry.STATUS.CANCEL) {
+                entry = null;
+            }
             Trace.i(data.toString());
         }
     };
@@ -43,14 +50,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onResume() {
-        LodaManager.getInstance().addObserver(watcher);
+        mlodaManager.addObserver(watcher);
         super.onResume();
     }
 
 
     @Override
     protected void onPause() {
-        LodaManager.getInstance().removeObserver(watcher);
+        mlodaManager.removeObserver(watcher);
         super.onPause();
     }
 
@@ -58,17 +65,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.download:
-                LodaEntry entry = new LodaEntry();
+                entry = new LodaEntry();
                 entry.setUrl("");
-
-                LodaManager.getInstance().add(this, entry);
+                entry.setId("1");
+                mlodaManager.add(entry);
 
                 break;
             case R.id.pause:
+                if (entry.getStatus() == LodaEntry.STATUS.PAUSE) {
+                    pause.setText("pause");
+                    mlodaManager.resume(entry);
+                    return;
+                }
 
+                mlodaManager.pause(entry);
+
+                pause.setText("resume");
                 break;
             case R.id.cancel:
-
+                mlodaManager.cancel(entry);
                 break;
         }
     }

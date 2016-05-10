@@ -6,6 +6,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by zace on 2015/5/10.
@@ -13,7 +15,7 @@ import java.util.HashMap;
 public class LodaService extends Service {
 
     private HashMap<String, LodaTask> tasks = new HashMap<>();
-
+    private ExecutorService executors;
 
     @Nullable
     @Override
@@ -25,6 +27,7 @@ public class LodaService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        executors = Executors.newCachedThreadPool();
     }
 
 
@@ -81,7 +84,7 @@ public class LodaService extends Service {
     private void startLoda(LodaEntry entry) {
 
         LodaTask task = new LodaTask(entry);
-        task.start();
+        executors.execute(task);
         tasks.put(entry.getId(), task);
 
     }

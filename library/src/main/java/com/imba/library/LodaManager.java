@@ -9,20 +9,22 @@ import android.content.Intent;
 public class LodaManager {
 
     private static LodaManager manager;
+    private final Context context;
 
-    private LodaManager() {
+    private LodaManager(Context context) {
+        this.context = context;
     }
 
-    public static synchronized LodaManager getInstance() {
+    public static synchronized LodaManager getInstance(Context context) {
         if (manager == null) {
-            manager = new LodaManager();
+            manager = new LodaManager(context);
         }
 
         return manager;
     }
 
 
-    public void add(Context context, LodaEntry entry) {
+    public void add(LodaEntry entry) {
         Intent intent = new Intent(context, LodaService.class);
         intent.putExtra(Cons.DOWNLOAD_KEY, entry);
         intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_ADD);
@@ -30,14 +32,25 @@ public class LodaManager {
     }
 
     public void pause(LodaEntry entry) {
-
+        Intent intent = new Intent(context, LodaService.class);
+        intent.putExtra(Cons.DOWNLOAD_KEY, entry);
+        intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_PAUSE);
+        context.startService(intent);
     }
 
     public void resume(LodaEntry entry) {
+        Intent intent = new Intent(context, LodaService.class);
+        intent.putExtra(Cons.DOWNLOAD_KEY, entry);
+        intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_RESUME);
+        context.startService(intent);
 
     }
 
     public void cancel(LodaEntry entry) {
+        Intent intent = new Intent(context, LodaService.class);
+        intent.putExtra(Cons.DOWNLOAD_KEY, entry);
+        intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_CANCEL);
+        context.startService(intent);
 
     }
 

@@ -3,7 +3,7 @@ package com.imba.library;
 /**
  * Created by zace on 2015/5/10.
  */
-public class LodaTask {
+public class LodaTask implements Runnable {
 
     private final LodaEntry entry;
     private boolean isPause;
@@ -18,10 +18,15 @@ public class LodaTask {
         entry.setStatus(LodaEntry.STATUS.DOWNLOADING);
         DataChanger.getInstance().postStatus(entry);
 
-        entry.totalLength = 1024 * 10;
+        entry.totalLength = 1024 * 20;
 
         while (entry.currentLength < entry.totalLength) {
 
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             if (isPause || isCancel) {
                 entry.setStatus(isPause ? LodaEntry.STATUS.PAUSE : LodaEntry.STATUS.CANCEL);
                 DataChanger.getInstance().postStatus(entry);
@@ -37,8 +42,15 @@ public class LodaTask {
     }
 
     public void pause() {
+        isPause = true;
     }
 
     public void cancel() {
+        isCancel = true;
+    }
+
+    @Override
+    public void run() {
+        start();
     }
 }
