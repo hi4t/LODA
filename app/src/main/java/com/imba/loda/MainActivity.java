@@ -108,16 +108,14 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     switch (entry.getStatus()) {
-
+                        case WAITING:
+                            break;
                         case IDLE:
                             mlodaManager.add(entry);
                             break;
                         case PAUSE:
-
                             mlodaManager.resume(entry);
-
                             break;
-
                         case DOWNLOADING:
                             mlodaManager.pause(entry);
                             break;

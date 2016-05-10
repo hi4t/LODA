@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by zace on 2015/5/10.
@@ -18,6 +19,8 @@ public class LodaService extends Service {
 
     private HashMap<String, LodaTask> tasks = new HashMap<>();
     private ExecutorService executors;
+    private LinkedBlockingQueue<LodaEntry> queue = new LinkedBlockingQueue<>();
+
 
     @Nullable
     @Override
@@ -28,6 +31,18 @@ public class LodaService extends Service {
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            LodaEntry entry = (LodaEntry) msg.obj;
+            switch (entry.getStatus()) {
+                case COMPLETE:
+                    tasks.remove(entry);
+                case PAUSE:
+                case CANCEL:
+                    entry = queue.poll();
+                    if (entry != null) {
+                        startLoda(entry);
+                    }
+            }
+
             DataChanger.getInstance().postStatus((LodaEntry) msg.obj);
         }
     };
@@ -43,9 +58,7 @@ public class LodaService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         LodaEntry entry = (LodaEntry) intent.getSerializableExtra(Cons.DOWNLOAD_KEY);
-
         String action = intent.getStringExtra(Cons.DOWNLOAD_ACTION);
-
         doAction(action, entry);
 
         return super.onStartCommand(intent, flags, startId);
@@ -56,7 +69,7 @@ public class LodaService extends Service {
         switch (action) {
 
             case Cons.DOWNLOAD_ADD:
-                startLoda(entry);
+                addLoda(entry);
                 break;
             case Cons.DOWNLOAD_PAUSE:
                 pauseLoda(entry);
@@ -70,15 +83,31 @@ public class LodaService extends Service {
         }
     }
 
+
+    private void addLoda(LodaEntry entry) {
+        if (tasks.size() >= Cons.MAX_CACHE) {
+            queue.offer(entry);
+            entry.setStatus(LodaEntry.STATUS.WAITING);
+            DataChanger.getInstance().postStatus(entry);
+        } else {
+            startLoda(entry);
+        }
+    }
+
+
     private void cancelLoda(LodaEntry entry) {
         LodaTask task = tasks.remove(entry.getId());
         if (task != null) {
             task.cancel();
+        } else {
+            queue.remove(entry);
+            entry.setStatus(LodaEntry.STATUS.CANCEL);
+            DataChanger.getInstance().postStatus(entry);
         }
     }
 
     private void resumeLoda(LodaEntry entry) {
-        startLoda(entry);
+        addLoda(entry);
     }
 
     private void pauseLoda(LodaEntry entry) {
@@ -86,12 +115,16 @@ public class LodaService extends Service {
 
         if (task != null) {
             task.pause();
+        } else {
+            queue.remove(entry);
+            entry.setStatus(LodaEntry.STATUS.PAUSE);
+            DataChanger.getInstance().postStatus(entry);
         }
     }
 
     private void startLoda(LodaEntry entry) {
 
-        LodaTask task = new LodaTask(entry,handler);
+        LodaTask task = new LodaTask(entry, handler);
         executors.execute(task);
         tasks.put(entry.getId(), task);
 

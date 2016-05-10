@@ -22,7 +22,7 @@ public class LodaEntry implements Serializable {
         this.status = status;
     }
 
-    public enum STATUS {DOWNLOADING, COMPLETE, CANCEL, PAUSE, IDLE}
+    public enum STATUS {DOWNLOADING, COMPLETE, CANCEL, PAUSE, IDLE, WAITING}
 
     public String getId() {
         return id;
