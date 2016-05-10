@@ -13,7 +13,16 @@ public class LodaEntry implements Serializable {
     public long totalLength;
     private STATUS status;
 
-    public enum STATUS {DOWNLOADING, COMPLETE, CANCEL, PAUSE}
+    public LodaEntry() {
+    }
+
+    public LodaEntry(String id, String url, STATUS status) {
+        this.id = id;
+        this.url = url;
+        this.status = status;
+    }
+
+    public enum STATUS {DOWNLOADING, COMPLETE, CANCEL, PAUSE, IDLE}
 
     public String getId() {
         return id;
@@ -43,5 +52,16 @@ public class LodaEntry implements Serializable {
     @Override
     public String toString() {
         return "entry status is " + getStatus() + " and the download is " + currentLength + " / " + totalLength;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        return o.hashCode() == this.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

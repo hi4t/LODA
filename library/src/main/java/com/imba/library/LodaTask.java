@@ -1,22 +1,27 @@
 package com.imba.library;
 
+import android.os.Handler;
+import android.os.Message;
+
 /**
  * Created by zace on 2015/5/10.
  */
 public class LodaTask implements Runnable {
 
     private final LodaEntry entry;
+    private final Handler handler;
     private boolean isPause;
     private boolean isCancel;
 
-    public LodaTask(LodaEntry entry) {
+    public LodaTask(LodaEntry entry, Handler handler) {
         this.entry = entry;
+        this.handler = handler;
     }
 
     public void start() {
 
         entry.setStatus(LodaEntry.STATUS.DOWNLOADING);
-        DataChanger.getInstance().postStatus(entry);
+        postStatus(entry);
 
         entry.totalLength = 1024 * 20;
 
@@ -29,16 +34,16 @@ public class LodaTask implements Runnable {
             }
             if (isPause || isCancel) {
                 entry.setStatus(isPause ? LodaEntry.STATUS.PAUSE : LodaEntry.STATUS.CANCEL);
-                DataChanger.getInstance().postStatus(entry);
+                postStatus(entry);
                 return;
             }
 
             entry.currentLength += 1024;
-            DataChanger.getInstance().postStatus(entry);
+            postStatus(entry);
         }
 
         entry.setStatus(LodaEntry.STATUS.COMPLETE);
-        DataChanger.getInstance().postStatus(entry);
+        postStatus(entry);
     }
 
     public void pause() {
@@ -53,4 +58,12 @@ public class LodaTask implements Runnable {
     public void run() {
         start();
     }
+
+    public void postStatus(LodaEntry entry) {
+        Message msg = handler.obtainMessage();
+        msg.obj = entry;
+        handler.sendMessage(msg);
+    }
+
+
 }

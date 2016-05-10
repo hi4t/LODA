@@ -2,7 +2,9 @@ package com.imba.library;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 
 import java.util.HashMap;
@@ -23,6 +25,12 @@ public class LodaService extends Service {
         return null;
     }
 
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            DataChanger.getInstance().postStatus((LodaEntry) msg.obj);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -83,7 +91,7 @@ public class LodaService extends Service {
 
     private void startLoda(LodaEntry entry) {
 
-        LodaTask task = new LodaTask(entry);
+        LodaTask task = new LodaTask(entry,handler);
         executors.execute(task);
         tasks.put(entry.getId(), task);
 
