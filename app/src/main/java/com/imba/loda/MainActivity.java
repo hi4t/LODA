@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.imba.library.DataWatcher;
 import com.imba.library.LodaEntry;
@@ -19,7 +23,7 @@ import com.imba.library.Trace;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener {
 
     private LodaManager mlodaManager;
     private RecyclerView mRecyclerView;
@@ -31,9 +35,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.id_toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(this);
         initData();
         initView();
         mlodaManager = LodaManager.getInstance(this);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     private void initData() {
@@ -82,6 +96,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         mlodaManager.removeObserver(watcher);
         super.onPause();
+    }
+
+    /**
+     * toolbar按钮点击回掉
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        String title = item.getTitle().toString();
+        if ("全部开始".equals(title)) {
+            mlodaManager.recoverAll();
+        } else {
+            mlodaManager.pauseAll();
+        }
+        item.setTitle(title.equals("全部开始") ? "全部暂停" : "全部开始");
+
+        return true;
     }
 
 
@@ -146,31 +179,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-//    @Override
-//    public void onClick(View v) {
-//        switch (v.getId()) {
-//            case R.id.download:
-//                entry = new LodaEntry();
-//                entry.setUrl("");
-//                entry.setId("1");
-//                mlodaManager.add(entry);
-//
-//                break;
-//            case R.id.pause:
-//                if (entry.getStatus() == LodaEntry.STATUS.PAUSE) {
-//                    pause.setText("pause");
-//                    mlodaManager.resume(entry);
-//                    return;
-//                }
-//
-//                mlodaManager.pause(entry);
-//
-//                pause.setText("resume");
-//                break;
-//            case R.id.cancel:
-//                mlodaManager.cancel(entry);
-//                break;
-//        }
-//    }
 }

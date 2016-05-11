@@ -1,5 +1,8 @@
 package com.imba.library;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Observable;
 
 /**
@@ -8,8 +11,12 @@ import java.util.Observable;
 public class DataChanger extends Observable {
 
     private static DataChanger dataChanger;
+    private LinkedHashMap<String, LodaEntry> entrys;
+    private ArrayList<LodaEntry> entryList;
 
     private DataChanger() {
+        entrys = new LinkedHashMap<>();
+        entryList = new ArrayList<>();
     }
 
     protected static synchronized DataChanger getInstance() {
@@ -22,7 +29,23 @@ public class DataChanger extends Observable {
 
     public void postStatus(LodaEntry entry) {
         setChanged();
+        entrys.put(entry.getId(), entry);
         notifyObservers(entry);
     }
+
+    public ArrayList<LodaEntry> getAllPauseEntry() {
+
+        if (entrys != null) {
+
+            for (Map.Entry<String, LodaEntry> entryMap : entrys.entrySet()) {
+                entryList.add(entryMap.getValue());
+            }
+
+            return entryList;
+        }
+
+        return null;
+    }
+
 
 }

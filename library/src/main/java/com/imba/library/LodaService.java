@@ -7,7 +7,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -80,7 +83,40 @@ public class LodaService extends Service {
             case Cons.DOWNLOAD_CANCEL:
                 cancelLoda(entry);
                 break;
+
+            case Cons.DOWNLOAD_PAUSE_ALL:
+                pauseAll();
+
+                break;
+            case Cons.DOWNLOAD_RECOVER_ALL:
+                recoverAll();
+                break;
         }
+    }
+
+    private void recoverAll() {
+        ArrayList<LodaEntry> entrys = DataChanger.getInstance().getAllPauseEntry();
+
+        if (entrys != null && entrys.size() > 0) {
+            for (LodaEntry entry : entrys) {
+                addLoda(entry);
+            }
+        }
+    }
+
+    private void pauseAll() {
+
+        while (queue.iterator().hasNext()) {
+            LodaEntry entry = queue.poll();
+            entry.setStatus(LodaEntry.STATUS.PAUSE);
+            DataChanger.getInstance().postStatus(entry);
+        }
+
+        for (Map.Entry<String, LodaTask> entry : tasks.entrySet()) {
+            entry.getValue().pause();
+        }
+
+        tasks.clear();
     }
 
 

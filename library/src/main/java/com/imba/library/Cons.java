@@ -11,5 +11,7 @@ public class Cons {
     public static final String DOWNLOAD_PAUSE = "download_pause";
     public static final String DOWNLOAD_RESUME = "download_resume";
     public static final String DOWNLOAD_CANCEL = "download_cancel";
+    public static final String DOWNLOAD_PAUSE_ALL = "download_pause_all";
+    public static final String DOWNLOAD_RECOVER_ALL = "download_recover_all";
     public static final int MAX_CACHE = 3;
 }

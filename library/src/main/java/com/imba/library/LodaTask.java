@@ -10,8 +10,8 @@ public class LodaTask implements Runnable {
 
     private final LodaEntry entry;
     private final Handler handler;
-    private boolean isPause;
-    private boolean isCancel;
+    private volatile boolean isPause;
+    private volatile boolean isCancel;
 
     public LodaTask(LodaEntry entry, Handler handler) {
         this.entry = entry;

@@ -54,6 +54,18 @@ public class LodaManager {
 
     }
 
+    public void pauseAll() {
+        Intent intent = new Intent(context, LodaService.class);
+        intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_PAUSE_ALL);
+        context.startService(intent);
+    }
+
+    public void recoverAll() {
+        Intent intent = new Intent(context, LodaService.class);
+        intent.putExtra(Cons.DOWNLOAD_ACTION, Cons.DOWNLOAD_RECOVER_ALL);
+        context.startService(intent);
+    }
+
 
     public LodaManager addObserver(DataWatcher watcher) {
         DataChanger.getInstance().addObserver(watcher);
